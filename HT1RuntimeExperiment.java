@@ -1,9 +1,24 @@
 import java.util.Random;
 
+/**
+ * Runs timing and collision experiments for the HashTable1-based
+ * k-mer distribution algorithm.
+ *
+ * Task 5:
+ *  - For random DNA strings of lengths n = 10^4, 10^5, 10^6
+ *    and k = 5, 6, 7, this program measures:
+ *      • Running time of the HT-based implementation
+ *      • Collision counts
+ *      • Number of unique k-mers stored
+ */
 public class HT1RuntimeExperiment {
 
+    /** DNA alphabet */
     private static final char[] BASES = {'a', 'c', 'g', 't'};
 
+    /**
+     * Generate a random DNA string.
+     */
     public static String generateRandomDNA(int length, Random rng) {
         char[] chars = new char[length];
         for (int i = 0; i < length; i++) {
@@ -13,62 +28,71 @@ public class HT1RuntimeExperiment {
     }
 
     /**
-     * Helper:
-     * Builds the k-mer distribution by inserting all possible k-mers
-     * into your HashTable1 implementation.
+     * Times the k-mer distribution using the student's HashTable1
+     * and prints collision statistics.
+     *
+     * @param dna The DNA sequence
+     * @param k   k-mer length
+     * @return    Time in milliseconds
      */
-    public static void buildKmerDistribution(HashTable1 table, String dna, int k) {
+    public static double timeKmerDistributionHT(String dna, int k) {
+
+        long start = System.nanoTime();
+
+        // Hash table size = n (standard approach)
+        HashTable1 ht = new HashTable1(dna.length());
+
+        // Insert all k-mers into the hash table
         for (int i = 0; i <= dna.length() - k; i++) {
-            String kmer = dna.substring(i, i + k);
-            table.insert(kmer);
+            ht.insert(dna.substring(i, i + k));
         }
+
+        long end = System.nanoTime();
+
+        double elapsedMs = (end - start) / 1_000_000.0;
+
+        // Print stats specific to HashTable1
+        System.out.println("    Collisions: " + ht.getCollisions());
+        System.out.println("    Unique k-mers: " + ht.getUniqueKmers());
+
+        return elapsedMs;
     }
 
     /**
-     * Times the HT1-based (djb2) k-mer distribution.
+     * Runs timing experiments for:
+     * n ∈ {10^4, 10^5, 10^6}
+     * k ∈ {5, 6, 7}
      */
-    public static double timeKmerDistribution(String dna, int k) {
-        long start = System.nanoTime();
-
-        // Create hashtable of size n (as required)
-        HashTable1 ht = new HashTable1(dna.length());
-
-        // Build the k-mer distribution
-        buildKmerDistribution(ht, dna, k);
-
-        long end = System.nanoTime();
-        return (end - start) / 1_000_000.0; // ms
-    }
-
     public static void runTimingExperiments() {
+
         int[] lengths = {10_000, 100_000, 1_000_000};
         int[] ks = {5, 6, 7};
 
         Random rng = new Random(12345);
 
-        System.out.println("HT1-based (djb2) k-mer distribution timing results");
+        System.out.println("Hash Table (HT1) k-mer distribution timing results");
         System.out.println("(Times in milliseconds)\n");
 
         for (int n : lengths) {
+
             String dna = generateRandomDNA(n, rng);
 
             System.out.println("String length n = " + n);
-
-            int previewLength = Math.min(80, n);
-            System.out.println("DNA prefix (first " + previewLength + " bases):");
-            System.out.println(dna.substring(0, previewLength));
-
             System.out.println("k\tTime (ms)");
 
             for (int k : ks) {
-                double elapsed = timeKmerDistribution(dna, k);
-                System.out.printf("%d\t%.3f%n", k, elapsed);
+                System.out.println("  k = " + k);
+                double time = timeKmerDistributionHT(dna, k);
+                System.out.printf("    Time: %.3f ms\n\n", time);
             }
 
             System.out.println();
         }
     }
 
+    /**
+     * Entry point
+     */
     public static void main(String[] args) {
         runTimingExperiments();
     }
