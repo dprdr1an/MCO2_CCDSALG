@@ -4,22 +4,22 @@
  */
 public class HashTable1 {
     private class Node {
-        String kmer;      // The k-mer string (e.g., "ACG")
-        int count;        // How many times we've seen this k-mer
-        Node next;        // Link to next node in chain
+        String kmer;
+        int count;
+        Node next;
 
         // Constructor
         Node(String kmer) {
             this.kmer = kmer;
-            this.count = 1;        // First time seeing this k-mer
-            this.next = null;      // No next node yet
+            this.count = 1;
+            this.next = null;
         }
     }
 
     // Hash table properties
-    private int tableSize;         // Size of the hash table
-    private Node[] table;          // Array of linked lists
-    private int collisions;        // Track number of collisions
+    private int tableSize;
+    private Node[] table;
+    private int collisions;
 
     /**
      * Constructor - create empty hash table
@@ -27,7 +27,7 @@ public class HashTable1 {
      */
     public HashTable1(int size) {
         this.tableSize = size;
-        this.table = new Node[size];  // Create array of Nodes
+        this.table = new Node[size];
         this.collisions = 0;
 
         // Initialize all slots to null (empty)
@@ -72,18 +72,16 @@ public class HashTable1 {
             Node current = table[index];
 
             while (current != null) {
-                // If we find the k-mer, increment its count
+
                 if (current.kmer.equals(kmer)) {
                     current.count++;
                     return;  // Done!
                 }
 
-                // If this is the last node, break
                 if (current.next == null) {
                     break;
                 }
 
-                // Move to next node
                 current = current.next;
             }
 
@@ -99,11 +97,9 @@ public class HashTable1 {
     public java.util.Map<String, Integer> getDistribution() {
         java.util.Map<String, Integer> distribution = new java.util.HashMap<>();
 
-        // Go through each slot in the table
         for (int i = 0; i < tableSize; i++) {
             Node current = table[i];
 
-            // Go through each node in the chain
             while (current != null) {
                 distribution.put(current.kmer, current.count);
                 current = current.next;
